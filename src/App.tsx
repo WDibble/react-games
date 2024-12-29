@@ -1,34 +1,42 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
-import './App.css'
+import { Link } from 'react-router-dom'
 
 function App() {
-  const [count, setCount] = useState(0)
-
   return (
-    <>
-      <div>
-        <a href="https://vitejs.dev" target="_blank">
-          <img src={viteLogo} className="logo" alt="Vite logo" />
-        </a>
-        <a href="https://react.dev" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
+    <div className="min-h-screen bg-[#fafafa] flex flex-col items-center">
+      {/* Main content */}
+      <div className="relative z-10 mt-16">
+        <h1 className="text-4xl font-bold text-gray-800 mb-12 text-center font-['CustomFont']">
+          REACT GAMES
+        </h1>
+        
+        <nav className="flex flex-col w-full max-w-md px-4">
+          <Link 
+            to="/wordguesser" 
+            className="bg-indigo-50 hover:bg-indigo-100 p-6 transition-all duration-300 ease-in-out hover:p-12 transform text-center"
+          >
+            <span className="text-2xl text-gray-800 font-['CustomFont']">
+              Word Guesser
+            </span>
+          </Link>
+          <Link 
+            to="/BirdFlapper" 
+            className="bg-rose-50 hover:bg-rose-100 p-6 transition-all duration-300 ease-in-out hover:p-12 transform text-center"
+          >
+            <span className="text-2xl text-gray-800 font-['CustomFont']">
+            Bird Flapper
+            </span>
+          </Link>
+          <Link 
+            to="/wordguesser" 
+            className="bg-emerald-50 hover:bg-emerald-100 p-6 transition-all duration-300 ease-in-out hover:p-12 transform text-center"
+          >
+            <span className="text-2xl text-gray-800 font-['CustomFont']">
+            Word Guesser
+            </span>
+          </Link>
+        </nav>
       </div>
-      <h1>Vite + React</h1>
-      <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
-        </button>
-        <p>
-          Edit <code>src/App.tsx</code> and save to test HMR
-        </p>
-      </div>
-      <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
-      </p>
-    </>
+    </div>
   )
 }
 
