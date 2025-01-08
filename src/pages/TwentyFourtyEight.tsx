@@ -155,6 +155,7 @@ export default function Game2048() {
     const touch = e.changedTouches[0]
     const dx = touch.clientX - touchStart.x
     const dy = touch.clientY - touchStart.y
+
     if (Math.abs(dx) > Math.abs(dy)) {
       if (dx > 0) {
         handleKeyDown({ key: 'ArrowRight' })
@@ -183,9 +184,8 @@ export default function Game2048() {
   }, [grid, gameOver])
 
   return (
-    <div className="min-h-screen bg-[#fafafa] flex flex-col items-center pt-4">
-      <div className="w-full max-w-md p-4">
-        <header className="py-8 px-4 sm:px-6 lg:px-8">
+    <div className="flex flex-col items-center justify-center h-screen bg-gray-200">
+      <header className="py-8 px-4 sm:px-6 lg:px-8">
           <Link to="/">
             <h1 className="text-1xl font-bold text-gray-800 text-center font-['CustomFont'] hover:text-gray-600 transition-colors">
               REACT GAMES
@@ -195,48 +195,42 @@ export default function Game2048() {
             2048
           </h1>
         </header>
-        <main className="container mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="max-w-sm mx-auto">
-            <div className="grid gap-2 bg-gray-800 p-4 rounded-lg">
-              {grid.map((row, rowIndex) => (
-                <div key={rowIndex} className="grid grid-cols-4 gap-2">
-                  {row.map((tile, colIndex) => (
-                    <div
-                      key={colIndex}
-                      className={`flex items-center justify-center w-16 h-16 text-2xl font-bold text-white rounded-lg ${
-                        tile === 0 ? 'bg-gray-400' : tileColors[tile]
-                      }`}
-                    >
-                      {tile !== 0 && tile}
-                    </div>
-                  ))}
-                </div>
-              ))}
-            </div>
-            <div className="mt-4 flex space-x-4">
-              <button onClick={() => handleKeyDown({ key: 'ArrowUp' })} className="p-2 bg-gray-500 rounded">↑</button>
-              <button onClick={() => handleKeyDown({ key: 'ArrowLeft' })} className="p-2 bg-gray-500 rounded">←</button>
-              <button onClick={() => handleKeyDown({ key: 'ArrowDown' })} className="p-2 bg-gray-500 rounded">↓</button>
-              <button onClick={() => handleKeyDown({ key: 'ArrowRight' })} className="p-2 bg-gray-500 rounded">→</button>
-            </div>
-            {gameOver && <div className="mt-4 text-red-500 text-center">Game Over</div>}
+      <div className="grid gap-2 bg-gray-800 p-4 rounded-lg">
+        {grid.map((row, rowIndex) => (
+          <div key={rowIndex} className="grid grid-cols-4 gap-2">
+            {row.map((tile, colIndex) => (
+              <div
+                key={colIndex}
+                className={`flex items-center justify-center w-16 h-16 text-2xl font-bold text-white rounded-lg ${
+                  tile === 0 ? 'bg-gray-200' : `bg-${tileColors[tile] || 'bg-gray-200'}`
+                }`}
+              >
+                {tile !== 0 && tile}
+              </div>
+            ))}
           </div>
-        </main>
+        ))}
+      </div>
+      <div className="mt-4 flex space-x-4">
+        <button onClick={() => handleKeyDown({ key: 'ArrowUp' })} className="p-4 bg-gray-300 rounded text-2xl text-gray-400">↑</button>
+        <button onClick={() => handleKeyDown({ key: 'ArrowDown' })} className="p-4 bg-gray-300 rounded text-2xl text-gray-400">↓</button>
+        <button onClick={() => handleKeyDown({ key: 'ArrowLeft' })} className="p-4 bg-gray-300 rounded text-2xl text-gray-400">←</button>
+        <button onClick={() => handleKeyDown({ key: 'ArrowRight' })} className="p-4 bg-gray-300 rounded text-2xl text-gray-400">→</button>
       </div>
     </div>
   )
 }
 
 const tileColors: { [key: number]: string } = {
-  2: 'bg-gray-300',
-  4: 'bg-gray-400',
-  8: 'bg-orange-400',
-  16: 'bg-orange-500',
-  32: 'bg-orange-600',
-  64: 'bg-orange-700',
-  128: 'bg-yellow-400',
-  256: 'bg-yellow-500',
-  512: 'bg-yellow-600',
-  1024: 'bg-yellow-700',
-  2048: 'bg-yellow-800',
+  2: 'gray-300',
+  4: 'gray-400',
+  8: 'orange-400',
+  16: 'orange-500',
+  32: 'orange-600',
+  64: 'orange-700',
+  128: 'yellow-400',
+  256: 'yellow-500',
+  512: 'yellow-600',
+  1024: 'yellow-700',
+  2048: 'yellow-800',
 }

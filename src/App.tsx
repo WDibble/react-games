@@ -34,6 +34,14 @@ function App() {
               2048
             </span>
           </Link>
+          <Link 
+            to="/higherorlower"
+            className="bg-pink-50 hover:bg-pink-100 p-4 sm:p-6 rounded-lg transition-all duration-300 ease-in-out hover:scale-105 text-center"
+          >
+            <span className="text-xl sm:text-2xl text-gray-800 font-['CustomFont']">
+              Higher or Lower
+            </span>
+          </Link>
         </nav>
       </div>
     </div>

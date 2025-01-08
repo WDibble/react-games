@@ -12,7 +12,7 @@ export function WordGuesser() {
   useEffect(() => {
     document.addEventListener('keydown', handleKeyDown)
     return () => document.removeEventListener('keydown', handleKeyDown)
-  })
+  }, [gameOver, currentGuess]) 
 
   const handleKeyDown = (e: KeyboardEvent) => {
     if (gameOver) return
