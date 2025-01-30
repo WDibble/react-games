@@ -6,6 +6,7 @@
 
 A collection of classic games rebuilt with modern web technologies - React, TypeScript, and Tailwind CSS.
 
+[![Live Demo](https://img.shields.io/badge/Demo-Play%20Now-red.svg)](https://react-games-ruby.vercel.app/)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.5-blue.svg)](https://www.typescriptlang.org/)
 [![React](https://img.shields.io/badge/React-18.3-61dafb.svg)](https://reactjs.org/)
 [![Tailwind CSS](https://img.shields.io/badge/Tailwind-3.4-38bdf8.svg)](https://tailwindcss.com/)
