@@ -201,9 +201,7 @@ export default function Game2048() {
             {row.map((tile, colIndex) => (
               <div
                 key={colIndex}
-                className={`flex items-center justify-center w-16 h-16 text-2xl font-bold text-white rounded-lg ${
-                  tile === 0 ? 'bg-gray-200' : `bg-${tileColors[tile] || 'bg-gray-200'}`
-                }`}
+                className={`flex items-center justify-center w-16 h-16 text-2xl font-bold rounded-lg ${getTileStyle(tile)}`}
               >
                 {tile !== 0 && tile}
               </div>
@@ -221,16 +219,20 @@ export default function Game2048() {
   )
 }
 
-const tileColors: { [key: number]: string } = {
-  2: 'gray-300',
-  4: 'gray-400',
-  8: 'orange-400',
-  16: 'orange-500',
-  32: 'orange-600',
-  64: 'orange-700',
-  128: 'yellow-400',
-  256: 'yellow-500',
-  512: 'yellow-600',
-  1024: 'yellow-700',
-  2048: 'yellow-800',
+const getTileStyle = (value: number): string => {
+  if (value === 0) return 'bg-gray-200'
+  switch (value) {
+    case 2:    return 'bg-gray-500 text-white'
+    case 4:    return 'bg-gray-600 text-white'
+    case 8:    return 'bg-orange-400 text-white'
+    case 16:   return 'bg-orange-500 text-white'
+    case 32:   return 'bg-orange-600 text-white'
+    case 64:   return 'bg-red-500 text-white'
+    case 128:  return 'bg-yellow-300 text-white'
+    case 256:  return 'bg-yellow-400 text-white'
+    case 512:  return 'bg-yellow-500 text-white'
+    case 1024: return 'bg-yellow-600 text-white'
+    case 2048: return 'bg-yellow-700 text-white'
+    default:   return 'bg-gray-300 text-gray-900'
+  }
 }
