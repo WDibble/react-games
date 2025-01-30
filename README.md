@@ -16,7 +16,7 @@ A collection of classic games rebuilt with modern web technologies - React, Type
 
 ## 🎯 Overview
 
-Four classic games reimagined using modern web technologies. Perfect for learning React patterns and game development concepts. Features responsive design, touch support, and keyboard controls.
+Four classic games reimagined using modern web technologies. Built for mobile, compatible with desktop. Perfect for learning React patterns and game development concepts. Features responsive design, touch support, and keyboard controls.
 
 ## 🎲 Games Included
 
