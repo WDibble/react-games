@@ -10,12 +10,19 @@ export function WordGuesser() {
   const inputRef = useRef<HTMLInputElement>(null)
 
   useEffect(() => {
-    document.addEventListener('keydown', handleKeyDown)
-    return () => document.removeEventListener('keydown', handleKeyDown)
-  }, [gameOver, currentGuess]) 
+    // Only add keyboard listener if not on mobile
+    const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent)
+    if (!isMobile) {
+      document.addEventListener('keydown', handleKeyDown)
+      return () => document.removeEventListener('keydown', handleKeyDown)
+    }
+  }, [gameOver, currentGuess])
 
   const handleKeyDown = (e: KeyboardEvent) => {
     if (gameOver) return
+    
+    // Ignore keyboard events if they're from the input element
+    if ((e.target as HTMLElement)?.tagName === 'INPUT') return
     
     if (e.key === 'Enter' && currentGuess.length === 5) {
       submitGuess()
