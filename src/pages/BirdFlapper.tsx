@@ -2,23 +2,43 @@ import { useState, useEffect, useRef } from 'react'
 import { Link } from 'react-router-dom'
 
 export function BirdFlapper() {
-  const gravity = 0.25
-  const jumpVelocity = -6
-  const gapSize = 160
-  const pipeWidth = 60
-  const birdSize = 40
-  const birdX = 50
+  // Game constants
+  const gravity = 0.15
+  const jumpVelocity = -4
+  const gapSize = 180
+  const pipeWidth = 52
+  const birdSize = 32
+  const birdX = 80
+  const gameSpeed = 2
+  const cloudSpeed = 0.5
+  const hillSpeed = 1
 
+  // Game state
   const [birdY, setBirdY] = useState(200)
   const [velocity, setVelocity] = useState(0)
-  const [pipes, setPipes] = useState([{ x: 300, topHeight: 150, scored: false }])
+  const [rotation, setRotation] = useState(0)
+  const [pipes, setPipes] = useState([{ x: 400, topHeight: 150, scored: false }])
   const [score, setScore] = useState(0)
   const [gameOver, setGameOver] = useState(false)
+  const [clouds, setClouds] = useState([
+    { x: 100, y: 50 },
+    { x: 300, y: 80 },
+    { x: 600, y: 30 }
+  ])
+  const [hills, setHills] = useState([
+    { x: 0, height: 120 },
+    { x: 300, height: 80 },
+    { x: 600, height: 100 }
+  ])
+  
   const gameLoopRef = useRef<number>()
   const containerRef = useRef<HTMLDivElement>(null)
 
   const flap = () => {
-    if (!gameOver) setVelocity(jumpVelocity)
+    if (!gameOver) {
+      setVelocity(jumpVelocity)
+      setRotation(-20)
+    }
   }
 
   const handleKeyDown = (e: KeyboardEvent) => {
@@ -39,27 +59,48 @@ export function BirdFlapper() {
 
   function gameLoop() {
     if (gameOver) return
+
+    // Update bird physics
     setBirdY(y => y + velocity)
     setVelocity(v => v + gravity)
+    setRotation(r => Math.min(r + 2, 45))
 
+    // Update parallax elements
+    setClouds(prev => prev.map(cloud => ({
+      ...cloud,
+      x: cloud.x - cloudSpeed < -100 ? 800 : cloud.x - cloudSpeed
+    })))
+
+    setHills(prev => prev.map(hill => ({
+      ...hill,
+      x: hill.x - hillSpeed < -300 ? 700 : hill.x - hillSpeed
+    })))
+
+    // Update pipes and scoring in a single update
     setPipes(prev => {
-      const newPipes = prev
-        .map(p => {
-          const nextX = p.x - 1
-          if (!p.scored && nextX + pipeWidth < birdX) {
-            setScore(s => s + 1)
-            return { ...p, x: nextX, scored: true }
+      let scoreIncremented = false;
+      const newPipes = prev.map(pipe => {
+        const nextX = pipe.x - gameSpeed;
+        if (!pipe.scored && nextX + pipeWidth < birdX) {
+          if (!scoreIncremented) {
+            setScore(s => s + 0.5);
+            scoreIncremented = true;
           }
-          return { ...p, x: nextX }
-        })
-        .filter(p => p.x + pipeWidth > 0)
+          return { ...pipe, x: nextX, scored: true };
+        }
+        return { ...pipe, x: nextX };
+      }).filter(p => p.x + pipeWidth > -100);
 
-      if (newPipes.length && newPipes[newPipes.length - 1].x < 200) {
-        const newHeight = 50 + Math.floor(Math.random() * 150)
-        newPipes.push({ x: 600, topHeight: newHeight, scored: false })
+      if (newPipes.length && newPipes[newPipes.length - 1].x < 400) {
+        newPipes.push({
+          x: 800,
+          topHeight: 80 + Math.floor(Math.random() * 160),
+          scored: false
+        });
       }
-      return newPipes
-    })
+
+      return newPipes;
+    });
 
     checkCollision()
     if (gameLoopRef.current) {
@@ -96,9 +137,20 @@ export function BirdFlapper() {
   const resetGame = () => {
     setBirdY(200)
     setVelocity(0)
-    setPipes([{ x: 300, topHeight: 150, scored: false }])
+    setRotation(0)
+    setPipes([{ x: 400, topHeight: 150, scored: false }])
     setScore(0)
     setGameOver(false)
+    setClouds([
+      { x: 100, y: 50 },
+      { x: 300, y: 80 },
+      { x: 600, y: 30 }
+    ])
+    setHills([
+      { x: 0, height: 120 },
+      { x: 300, height: 80 },
+      { x: 600, height: 100 }
+    ])
   }
 
   return (
@@ -112,11 +164,53 @@ export function BirdFlapper() {
             width: '100%',
             height: '100vh',
             overflow: 'hidden',
-            background: 'linear-gradient(to bottom, #87CEEB, #B0E0E6)'
+            background: 'linear-gradient(to bottom, #64B5F6, #90CAF9, #BBDEFB)'
           }}
         >
+          {/* Parallax Clouds */}
+          {clouds.map((cloud, i) => (
+            <div
+              key={i}
+              style={{
+                position: 'absolute',
+                left: `${cloud.x}px`,
+                top: `${cloud.y}px`,
+                width: '80px',
+                height: '40px',
+                background: '#fff',
+                borderRadius: '20px',
+                opacity: 0.9,
+                boxShadow: '0 4px 8px rgba(0,0,0,0.1)',
+                zIndex: 1
+              }}
+            />
+          ))}
+
+          {/* Parallax Hills */}
+          {hills.map((hill, i) => (
+            <div
+              key={i}
+              style={{
+                position: 'absolute',
+                left: `${hill.x}px`,
+                bottom: '0',
+                width: '300px',
+                height: `${hill.height}px`,
+                background: '#4CAF50',
+                borderRadius: '50% 50% 0 0',
+                zIndex: 2
+              }}
+            />
+          ))}
+
+          {/* Score Display */}
           <div className="w-full max-w-md p-4" style={{ position: 'absolute', top: 0, zIndex: 10 }}>
-            <header className="py-8 px-4 sm:px-6 lg:px-8" style={{ background: 'rgba(255, 255, 255, 0.5)', padding: '10px', borderRadius: '10px' }}>
+            <header className="py-4 px-4 sm:px-6 lg:px-8" style={{ 
+              background: 'rgba(255, 255, 255, 0.9)',
+              padding: '10px',
+              borderRadius: '10px',
+              boxShadow: '0 2px 4px rgba(0,0,0,0.1)'
+            }}>
               <Link to="/">
                 <h1 className="text-1xl font-bold text-gray-800 text-center font-['CustomFont'] hover:text-gray-600 transition-colors">
                   REACT GAMES
@@ -125,16 +219,8 @@ export function BirdFlapper() {
               <h1 className="text-3xl font-bold text-gray-800 text-center font-['CustomFont']">
                 Bird Flapper
               </h1>
-              <div
-                style={{
-                  fontSize: '24px',
-                  fontWeight: 'bold',
-                  color: 'black',
-                  textAlign: 'center',
-                  marginTop: '0px'
-                }}
-              >
-                Score: {score}
+              <div className="text-2xl font-bold text-gray-800 text-center mt-2">
+                {score}
               </div>
             </header>
           </div>
@@ -147,86 +233,102 @@ export function BirdFlapper() {
                 left: `${birdX}px`,
                 top: `${birdY}px`,
                 width: `${birdSize}px`,
-                height: `${birdSize}px`
+                height: `${birdSize}px`,
+                transform: `rotate(${rotation}deg)`,
+                transition: 'transform 0.1s',
+                zIndex: 5
               }}
             >
-              {/* Body */}
               <div
                 style={{
                   width: '100%',
                   height: '100%',
-                  borderRadius: '50%',
-                  background: 'radial-gradient(circle at 30% 30%, yellow, orange)'
+                  background: '#FFB74D',
+                  borderRadius: '50% 60% 40% 50%',
+                  position: 'relative',
+                  boxShadow: '0 2px 4px rgba(0,0,0,0.2)'
                 }}
-              />
-              {/* Eye */}
-              <div
-                style={{
+              >
+                <div style={{
                   position: 'absolute',
-                  left: '65%',
-                  top: '20%',
-                  width: '15%',
-                  height: '15%',
+                  left: '70%',
+                  top: '30%',
+                  width: '20%',
+                  height: '20%',
+                  background: '#FFF',
                   borderRadius: '50%',
-                  background: '#fff'
-                }}
-              />
-              <div
-                style={{
+                  border: '2px solid #333'
+                }} />
+                <div style={{
                   position: 'absolute',
-                  left: '68%',
-                  top: '25%',
-                  width: '7%',
-                  height: '7%',
-                  borderRadius: '50%',
-                  background: '#000'
-                }}
-              />
-              {/* Beak */}
-              <div
-                style={{
-                  position: 'absolute',
-                  left: '85%',
+                  left: '80%',
                   top: '45%',
-                  width: '0',
-                  height: '0',
-                  borderLeft: '6px solid orange',
-                  borderTop: '4px solid transparent',
-                  borderBottom: '4px solid transparent'
-                }}
-              />
+                  width: '30%',
+                  height: '12%',
+                  background: '#FF7043',
+                  clipPath: 'polygon(0 0, 100% 50%, 0 100%)'
+                }} />
+                <div style={{
+                  position: 'absolute',
+                  left: '0%',
+                  top: '40%',
+                  width: '60%',
+                  height: '25%',
+                  background: '#FFA726',
+                  borderRadius: '50%',
+                  transform: 'rotate(-5deg)'
+                }} />
+              </div>
             </div>
           )}
 
           {/* Pipes */}
           {pipes.map((p, i) => (
-            <div key={i}>
-              {/* Top Pipe */}
+            <div key={i} style={{ position: 'absolute', zIndex: 4 }}>
               <div
                 style={{
                   position: 'absolute',
                   left: `${p.x}px`,
-                  top: '0px',
+                  top: '0',
                   width: `${pipeWidth}px`,
                   height: `${p.topHeight}px`,
-                  background: 'linear-gradient(to bottom, #228B22, #006400)',
-                  border: '2px solid #003300',
-                  borderRadius: '8px'
+                  background: '#43A047',
+                  boxShadow: '2px 0 4px rgba(0,0,0,0.2)',
+                  borderRadius: '0 0 4px 4px'
                 }}
-              />
-              {/* Bottom Pipe */}
+              >
+                <div style={{
+                  position: 'absolute',
+                  bottom: -20,
+                  left: -10,
+                  width: `${pipeWidth + 20}px`,
+                  height: '20px',
+                  background: '#2E7D32',
+                  borderRadius: '4px'
+                }} />
+              </div>
               <div
                 style={{
                   position: 'absolute',
                   left: `${p.x}px`,
                   top: `${p.topHeight + gapSize}px`,
                   width: `${pipeWidth}px`,
-                  height: '1000px',
-                  background: 'linear-gradient(to bottom, #228B22, #006400)',
-                  border: '2px solid #003300',
-                  borderRadius: '8px'
+                  height: '800px',
+                  background: '#43A047',
+                  boxShadow: '2px 0 4px rgba(0,0,0,0.2)',
+                  borderRadius: '4px 4px 0 0'
                 }}
-              />
+              >
+                <div style={{
+                  position: 'absolute',
+                  top: -20,
+                  left: -10,
+                  width: `${pipeWidth + 20}px`,
+                  height: '20px',
+                  background: '#2E7D32',
+                  borderRadius: '4px'
+                }} />
+              </div>
             </div>
           ))}
 
@@ -238,23 +340,18 @@ export function BirdFlapper() {
                 top: '50%',
                 left: '50%',
                 transform: 'translate(-50%, -50%)',
-                background: 'rgba(255,255,255,0.85)',
-                padding: '20px',
-                borderRadius: '10px',
-                textAlign: 'center'
+                background: 'rgba(255,255,255,0.95)',
+                padding: '24px',
+                borderRadius: '12px',
+                textAlign: 'center',
+                boxShadow: '0 4px 12px rgba(0,0,0,0.2)',
+                zIndex: 20
               }}
             >
+              <div className="text-2xl font-bold mb-4">Score: {score}</div>
               <button
                 onClick={resetGame}
-                style={{
-                  padding: '10px 20px',
-                  fontSize: '18px',
-                  background: '#BBBBBB',
-                  color: '#fff',
-                  border: 'none',
-                  borderRadius: '5px',
-                  cursor: 'pointer'
-                }}
+                className="bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-6 rounded-lg transition-colors"
               >
                 Try Again
               </button>
