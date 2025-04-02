@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react'
+import { useState, useEffect, useRef, useCallback } from 'react'
 import { Link } from 'react-router-dom'
 
 export function WordGuesser() {
@@ -6,41 +6,10 @@ export function WordGuesser() {
   const [currentGuess, setCurrentGuess] = useState('')
   const [currentRow, setCurrentRow] = useState(0)
   const [gameOver, setGameOver] = useState(false)
-  const [answer] = useState('REACT') // You can modify this or make it random
+  const [answer] = useState('REACT')
   const inputRef = useRef<HTMLInputElement>(null)
 
-  useEffect(() => {
-    // Only add keyboard listener if not on mobile
-    const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent)
-    if (!isMobile) {
-      document.addEventListener('keydown', handleKeyDown)
-      return () => document.removeEventListener('keydown', handleKeyDown)
-    }
-  }, [gameOver, currentGuess])
-
-  const handleKeyDown = (e: KeyboardEvent) => {
-    if (gameOver) return
-    
-    // Ignore keyboard events if they're from the input element
-    if ((e.target as HTMLElement)?.tagName === 'INPUT') return
-    
-    if (e.key === 'Enter' && currentGuess.length === 5) {
-      submitGuess()
-    } else if (e.key === 'Backspace') {
-      setCurrentGuess(currentGuess.slice(0, -1))
-    } else if (currentGuess.length < 5 && e.key.match(/^[a-zA-Z]$/)) {
-      setCurrentGuess(currentGuess + e.key.toUpperCase())
-    }
-  }
-
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const value = e.target.value.toUpperCase()
-    if (value.length <= 5 && value.match(/^[A-Z]*$/)) {
-      setCurrentGuess(value)
-    }
-  }
-
-  const submitGuess = () => {
+  const submitGuess = useCallback(() => {
     if (currentRow < 6) {
       const newGuesses = [...guesses]
       newGuesses[currentRow] = currentGuess
@@ -53,6 +22,42 @@ export function WordGuesser() {
       } else if (currentRow === 5) {
         setGameOver(true)
       }
+    }
+  }, [currentRow, currentGuess, guesses, answer])
+
+  useEffect(() => {
+    const handleKeyPress = (e: KeyboardEvent) => {
+      if (gameOver) return
+      
+      if (e.key === 'Enter' && currentGuess.length === 5) {
+        submitGuess()
+        e.preventDefault()
+      } else if (e.key === 'Backspace' && (e.target as HTMLElement)?.tagName !== 'INPUT') {
+        setCurrentGuess(currentGuess.slice(0, -1))
+      } else if (currentGuess.length < 5 && e.key.match(/^[a-zA-Z]$/) && (e.target as HTMLElement)?.tagName !== 'INPUT') {
+        setCurrentGuess(currentGuess + e.key.toUpperCase())
+      }
+    }
+
+    // Only add keyboard listener if not on mobile
+    const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent)
+    if (!isMobile) {
+      document.addEventListener('keydown', handleKeyPress)
+      return () => document.removeEventListener('keydown', handleKeyPress)
+    }
+  }, [gameOver, currentGuess, currentRow, submitGuess])
+  
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value.toUpperCase()
+    if (value.length <= 5 && value.match(/^[A-Z]*$/)) {
+      setCurrentGuess(value)
+    }
+  }
+
+  const handleInputKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === 'Enter' && currentGuess.length === 5) {
+      submitGuess()
+      e.preventDefault()
     }
   }
 
@@ -79,6 +84,7 @@ export function WordGuesser() {
         type="text"
         value={currentGuess}
         onChange={handleInputChange}
+        onKeyDown={handleInputKeyDown}
         maxLength={5}
         className="opacity-0 absolute"
         autoCapitalize="characters"
